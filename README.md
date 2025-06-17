@@ -1,0 +1,42 @@
+
+# dsMatchingClient
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version/dsMatchingClient)](https://CRAN.R-project.org/package=dsMatchingClient)
+[![R-CMD-check](https://github.com/roygusinow/dsMatchingClient/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/roygusinow/dsMatchingClient/actions/workflows/R-CMD-check.yml)
+[![codecov](https://codecov.io/gh/roygusinow/dsMatchingClient/graph/badge.svg?token=19CXOIZ0I9)](https://codecov.io/gh/roygusinow/dsMatchingClient)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
+------------------------------------------------------------------------
+
+## Overview
+
+`dsMatchingClient` provides tools for estimating causal effects using
+federated generalized linear models (GLMs) and matching methods within
+the [DataSHIELD](https://www.datashield.org/) infrastructure. The
+serverside package `dsMatching` implements the necessary server-side
+functionality,
+[github.com/roygusinow/dsMatching](https://github.com/roygusinow/dsMatching)
+
+It supports:
+
+- Estimation of ATE, ATT, and ATC
+- Matching with subclassification or optimal methods
+- Robust sandwich variance estimation
+- Balance diagnostics and plotting (e.g., Love plots, QQ plots)
+- Federated summary statistics and ECDF-based summaries
+
+------------------------------------------------------------------------
+
+## Installation
+
+``` r
+# Install the development version from GitHub
+# install.packages("remotes")
+remotes::install_github("roygusinow/dsMatchingClient")
+```

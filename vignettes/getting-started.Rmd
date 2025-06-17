@@ -1,0 +1,252 @@
+---
+title: "Getting Started with dsMatchingClient"
+author: "Roy Gusinow"
+# date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with dsMatchingClient}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+<img src="resources/images/matching_noise.png"  width="650">
+
+This is an introduction to dsMatchingClient package for use within the DataSHIELD infrastructure. Please make sure you are familiar with DataSHIELD and DSLite before proceeding. This example is based off of the MatchIt package example described [here](https://cran.r-project.org/web/packages/MatchIt/vignettes/assessing-balance.html), where we will be using the Lalonde dataset to estimate the effect of a job training program on real earnings in 1974 (`re74`). The Lalonde dataset is a well-known dataset in the field of causal inference and matching.
+
+# Setup and Log in
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+# Install the current version of both the client and server packages found locally
+# devtools::install("../dsMatching")
+# devtools::install("../dsMatchingClient")
+
+# Load all the required packages
+library(dsBase)
+library(dsBaseClient)
+library(DSLite)
+library(dsMatching)
+library(dsMatchingClient)
+
+library("MatchIt")
+
+# set seed
+seed_num <- 741
+set.seed(seed_num)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+# real data
+data("lalonde")
+
+# prepare test data in a light DS server
+split_it <- function(df){
+  df1 <- df[1:50,]
+  df2 <- df[51:200,]
+  df3 <- df[201:dim(df)[1],]
+
+  return(list("df1" = df1, "df2" = df2, "df3" = df3))
+}
+shuffled_lalonde <- lalonde[sample(1:nrow(lalonde)), ]
+sp <- split_it(shuffled_lalonde)
+lalonde1 <- sp$df1
+lalonde2 <- sp$df2
+lalonde3 <- sp$df3
+
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+# Create virtualized server with DSLite, assign everything needed on it
+cfg <- DSLite::defaultDSConfiguration(include=c("dsBase", "dsMatching"))
+cfg$Options$default.datashield.privacyControlLevel <- "\"permissive\""
+cfg$Options$default.nfilter.glm <- "1"
+
+dslite.server <- newDSLiteServer(tables=list(lalonde1=lalonde1, lalonde2=lalonde2, lalonde3=lalonde3),
+                                 config = cfg)
+
+builder <- DSI::newDSLoginBuilder()
+builder$append(server = "server1", url = "dslite.server", table = "lalonde1", driver = "DSLiteDriver")
+builder$append(server = "server2", url = "dslite.server", table = "lalonde2", driver = "DSLiteDriver")
+builder$append(server = "server3", url = "dslite.server", table = "lalonde3", driver = "DSLiteDriver")
+
+logindata.dslite <- builder$build()
+
+# Login to the virtualized server
+connections <- datashield.login(logindata.dslite, assign=T)
+
+DSI::datashield.assign.table(conns = connections, symbol = "lalonde", table = c("lalonde1","lalonde2", "lalonde3"))
+
+# set seed
+empt <- ds.setSeed(seed.as.integer = seed_num, datasources = connections)
+```
+
+After assignment of the Lalonde dataset on the remote OPAL server `lalonde`, we can now use the dsMatchingClient package to perform matching. On our 3 remote servers `lalonde1`, `lalonde2`, and `lalonde3`, we have the Lalonde dataset split into three chunks. Let's view the column names of the dataset to understand what covariates we have available for matching.
+
+```{r message=FALSE, warning=FALSE}
+fed_colnames <- ds.colnames("lalonde", datasources = connections)
+
+print(fed_colnames)
+```
+
+# Nearest Neighbour Matching
+
+We will use the `ds.matchit` function to perform matching based on the propensity score. The treatment variable is `treat`, and we will match on several covariates: `age`, `educ`, `married`, `nodegree`, `re74`, and `re75`. There are several types of matching, each with various parameters to set your desired matching method. 
+
+First, we will use the `nearest` method, which is a common method for matching based on the nearest neighbor propensity score. Here, we are adding normally distributed noise (with standard deviation equal to 0.3) to the propensity scores. We create a new matched object `matched_pool` on the server.
+
+## Federated Matching
+```{r results='hide', message=FALSE, warning=FALSE}
+fed_match <- ds.matchit(form = treat ~ age + educ + married + nodegree + re74 + re75,
+                        data = "lalonde",
+                        privacy = "norm",
+                        sd = 0.3,
+                        newobj = "matched_lalonde",
+
+                        method = "nearest")
+```
+So now we have a new object `matched_lalonde` on the server, which contains the matched data based on the nearest neighbor propensity score matching with added noise.
+
+```{r message=FALSE, warning=FALSE}
+print(ds.colnames("matched_lalonde", datasources = connections))
+```
+
+# Summary Statistics Tables
+
+Now let's compare how the balance of the covariates changed after matching. We will look at the summary statistics for both the unmatched and matched data.
+
+Get summary statistics after the matching is done to see how good the matching procedure went with the additive noise to the propensity scores. Note that the corresponding domain of the eCDF cannot be provided as this is disclosive. As a result, the eCDF mean and maximum results are an approximation of the true results by construction and equidistance domain.
+
+```{r results='hide', message=FALSE, warning=FALSE}
+fed_summary.combined <- ds.match_summary(unmatched_obj = "lalonde",
+                                         matched_obj = "matched_lalonde",
+                                         type = "combined",
+                                         treatment = "treat")
+```
+
+Let's print the summary statistics for both the unmatched and matched data. The summary statistics will include the means, standard deviations, and standardized mean differences for each covariate.
+
+#### All Data
+
+```{r, results='asis'}
+all_data_summary <- fed_summary.combined$`Summary of Balance for All Data:`
+knitr::kable(all_data_summary) # print it nicely
+```
+
+#### Matched data
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(fed_summary.combined$`Summary of Balance for Matched Data:`)
+```
+
+As we can see, the standardized mean differences for the covariates are smaller after matching. indicating that the matching procedure was successful in balancing the covariates between the treatment and control groups.
+# Plotting
+
+## Love Plots
+
+Visually show before/after matching standard differences between different variables.
+
+```{r fig.width = 6.5, fig.height = 6}
+fed_love_plot <- love.plot(fed_summary.combined)
+fed_love_plot
+```
+
+
+## eQQ Plots
+
+Ensure quantile-quantile plots are similiar
+```{r fig.width = 6.5, fig.height = 6}
+# plots
+which.xs <- treat ~ age + re74 + re75
+fed_qq_plot <- ds.qq_plot(unmatched = "lalonde",
+                          matched = "matched_lalonde",
+                          formula = which.xs)
+```
+
+## eCDF Plots
+
+As mentioned before, the step function of the eCDF is not exact but an approximation by construction of a domain
+```{r fig.width = 6.5, fig.height = 6}
+fed_eCDF_plot <- ds.eCDF_plot(unmatched = "lalonde",
+                              matched = "matched_lalonde",
+                              formula = which.xs)
+
+```
+
+
+Once satisfied with the matched subset of patient on the server `matched_lalonde`, we can proceed to use it for further analysis, such as estimating the Average Treatment Effect (ATE) or other causal inference methods.
+
+# Measuring Average Treatment Effect
+
+To estimate the Average Treatment Effect (ATE) using the matched data, we can use the `ds.avg_compute` function. This function will calculate the ATE based on the matched data and return the results as well as associated cluster-robust standard errors.
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+ds_fit <- dsBaseClient::ds.glm(formula = re78 ~ treat + age + re75 + educ,
+                 data = "matched_lalonde",
+                 family = "gaussian",
+                 viewVarCov = T,
+                 datasources = connections)
+
+ds_ate <- ds.avg_compute(fit = ds_fit,
+                         data = "matched_lalonde",
+                         treatment = "treat",
+                         estimand = "ATE",
+
+                         error_type = "HC3",
+                         clusters = fed_match$subclass,
+                         datasources = connections
+)
+```
+
+```{r}
+print(ds_ate)
+```
+
+Note that we first specify the function on how to estimate `re78` using the standard dsBaseClient package. Once the model is fitted, we can use it with `ds.avg_compute` to estimate the ATE. The `error_type` is set to "HC3" for cluster-robust standard errors, and we specify the clusters using the `fed_match$subclass` variable from our cluster. Internally, this uses the `weights` column which was generated on the server side.
+
+Finally, we can print the results of the ATE estimation.
+
+# Subclass Matching
+
+## Subclass Propensity Score Matching
+
+In the case where the data server custodian has set stronger privacy controls (i.e not `permissive` mode), propensity score subclassification can be used to derive corresponding weights which samples at the serverside, without large amounts of data being transferred to the client. 
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+fed_subclass_match <- ds.matchit_subclass(formula = treat ~ age + educ + married + nodegree + re74 + re75,
+                                         data = "lalonde",
+                                         subclass = 6, # specify 6 subclasses 
+                                         estimand = "ATE", # the subclass weights depend on the estimand
+                                         newobj = "matched_lalonde_subclass",
+                                         datasources = connections)
+
+```
+
+Now `matched_lalonde_subclass` table has been assigned to the server, containing the subclass weights for each observation in the Lalonde dataset.
+
+## Summary Statistics Tables for Subclass Matching
+
+We can generate a similiar summary statistics table for the subclass matching as we did for the nearest neighbor matching. This will allow us to compare the balance of covariates before and after subclass matching, this time in subclasses, which are summarised across servers
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+fed_summary_subclass.combined <- ds.match_summary_subclass(unmatched_obj = "lalonde",
+                                                          matched_obj = "matched_lalonde_subclass",
+                                                          treatment = "treat")
+```
+
+```{r message=FALSE, warning=FALSE}
+print(fed_summary_subclass.combined)
+```
+
+# Log out
+```{r}
+# log out
+DSI::datashield.logout(connections)
+```
