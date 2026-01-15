@@ -57,6 +57,11 @@ ds.matchit_subclass <- function(formula,
     stop("Please provide a valid dataframe on the serverside")
   }
 
+  # convert if not formula
+  if (!inherits(formula, "formula")) {
+    formula <- stats::as.formula(formula)
+  }
+
   treatment = all.vars(formula)[1] # get treatment variable
 
   # generate propensity on the server

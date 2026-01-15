@@ -60,7 +60,6 @@ ds.match_summary <- function(unmatched_obj,
 
   # first call for unmatched
   cally <- call("match_summaryDS", unmatched_obj, bin_num, treatment, range_frame.char, weights = FALSE)
-  print(cally)
   unmatched <- DSI::datashield.aggregate(datasources, cally)
 
   # first call for matched

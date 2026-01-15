@@ -4,8 +4,6 @@
 #'
 #' @param formula A formula object. Specifies the GLM used to estimate the propensity score. The treatment variable must appear on the left-hand side.
 #' @param data A character string. The name of the data frame on the server-side.
-#' @param sd A numeric value. The standard deviation of the Gaussian noise when using global noise
-#' @param k An integer. The number of neighbors when using knn
 #' @param newobj A character string. The name of the new object to create on each server containing the matched dataset. Default is `"matched_df"`.
 #' @param datasources A list of `DSConnection-class` objects. If `NULL`, the function uses `datashield.connections_find()` to detect active connections.
 #' @param ... Additional arguments passed to the underlying `MatchIt::matchit()` function on the client side (e.g., `method`, `distance`, `replace`, `m.order`).
@@ -33,8 +31,6 @@
 #' @export
 ds.matchit <- function(formula = NULL,
                        data = NULL,
-                       sd = NULL,
-                       k = NULL,
                        newobj = "matched_df",
                        datasources = NULL,
                        ...
@@ -92,7 +88,7 @@ ds.matchit <- function(formula = NULL,
 
   # begin matching
   # first call
-  cally <- call("matchitDS", formula, data = data, distance = "distance", id_name = id_name, k, sd)
+  cally <- call("matchitDS", formula, data = data, distance = "distance", id_name = id_name)
   noise_distance <- DSI::datashield.aggregate(datasources, cally)
   if (inherits(noise_distance, "character")){
     return(noise_distance)
@@ -133,6 +129,7 @@ ds.matchit <- function(formula = NULL,
                  pooled.match[, id_name],
                  pooled.match[, "distance"],
                  pooled.match[, "weights"],
+                 pooled.match[, "subclass"],
                  id_name)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally2)
 

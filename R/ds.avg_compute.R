@@ -1,8 +1,8 @@
 #' Compute Average Treatment Effects (ATE, ATT, ATC) with Optional Standard Errors
 #'
-#' This function computes the average treatment effect (ATE), average treatment effect on the treated (ATT),
-#' or average treatment effect on the controls (ATC) from a fitted DataSHIELD GLM object. It can optionally return
-#' heteroskedasticity-consistent standard errors using sandwich variance estimation and cluster-robust correction.
+# This function computes the average treatment effect (ATE), average treatment effect on the treated (ATT),
+# or average treatment effect on the controls (ATC) from a fitted DataSHIELD GLM object. It can optionally return
+# heteroskedasticity-consistent standard errors using sandwich variance estimation and cluster-robust correction.
 #'
 #' @param fit A list. Output from a `ds.glm` model. Must contain required elements like the formula and coefficients.
 #' @param data A character string. The name of the data frame stored on the server side.

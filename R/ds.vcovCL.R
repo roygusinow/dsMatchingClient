@@ -56,7 +56,7 @@ ds.vcovCL <- function(fit,
   }
 
   if (!is.null(clusters) && !is.factor(clusters)) {
-    stop("The 'clusters' argument must be a integer vector if provided.")
+    stop("The 'clusters' argument must be a factor vector if provided.")
   }
 
   # bread matrix

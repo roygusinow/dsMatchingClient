@@ -21,6 +21,8 @@
 #' }
 #'
 #' @author Roy Gusinow
+#'
+#' @export
 ds.jacobian <- function(fit,
                         data,
                         treatment,

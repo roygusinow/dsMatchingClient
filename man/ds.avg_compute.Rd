@@ -41,9 +41,7 @@ A named list with at least:
 }
 }
 \description{
-This function computes the average treatment effect (ATE), average treatment effect on the treated (ATT),
-or average treatment effect on the controls (ATC) from a fitted DataSHIELD GLM object. It can optionally return
-heteroskedasticity-consistent standard errors using sandwich variance estimation and cluster-robust correction.
+Compute Average Treatment Effects (ATE, ATT, ATC) with Optional Standard Errors
 }
 \details{
 This function wraps internal client-side calls to compute treatment effects and, optionally, robust standard errors.

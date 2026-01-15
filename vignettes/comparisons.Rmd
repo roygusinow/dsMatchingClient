@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 
 This is an introduction to dsMatchingClient package for use within the DataSHIELD infrastructure. Please make sure you are familiar with DataSHIELD and DSLite before proceeding. This example is based off of the MatchIt package example described [here](https://cran.r-project.org/web/packages/MatchIt/vignettes/assessing-balance.html)
 
-
 # Setup and Log in
 ```{r results='hide', message=FALSE, warning=FALSE}
 # Install the current version of both the client and server packages found locally

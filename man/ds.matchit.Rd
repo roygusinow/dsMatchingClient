@@ -9,8 +9,6 @@ and matches units based on the noisy scores using the `MatchIt` package logic on
 ds.matchit(
   formula = NULL,
   data = NULL,
-  sd = NULL,
-  k = NULL,
   newobj = "matched_df",
   datasources = NULL,
   ...
@@ -20,10 +18,6 @@ ds.matchit(
 \item{formula}{A formula object. Specifies the GLM used to estimate the propensity score. The treatment variable must appear on the left-hand side.}
 
 \item{data}{A character string. The name of the data frame on the server-side.}
-
-\item{sd}{A numeric value. The standard deviation of the Gaussian noise when using global noise}
-
-\item{k}{An integer. The number of neighbors when using knn}
 
 \item{newobj}{A character string. The name of the new object to create on each server containing the matched dataset. Default is `"matched_df"`.}
 

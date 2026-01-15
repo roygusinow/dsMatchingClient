@@ -23,8 +23,8 @@ This is an introduction to dsMatchingClient package for use within the DataSHIEL
 
 ```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 # Install the current version of both the client and server packages found locally
-# devtools::install("../dsMatching")
-# devtools::install("../dsMatchingClient")
+devtools::install("../dsMatching")
+devtools::install("../dsMatchingClient")
 
 # Load all the required packages
 library(dsBase)
@@ -65,6 +65,7 @@ lalonde3 <- sp$df3
 cfg <- DSLite::defaultDSConfiguration(include=c("dsBase", "dsMatching"))
 cfg$Options$default.datashield.privacyControlLevel <- "\"permissive\""
 cfg$Options$default.nfilter.glm <- "1"
+cfg$Options$default.privacy_budget <- "0.00001"
 
 dslite.server <- newDSLiteServer(tables=list(lalonde1=lalonde1, lalonde2=lalonde2, lalonde3=lalonde3),
                                  config = cfg)
@@ -103,8 +104,6 @@ First, we will use the `nearest` method, which is a common method for matching b
 ```{r results='hide', message=FALSE, warning=FALSE}
 fed_match <- ds.matchit(form = treat ~ age + educ + married + nodegree + re74 + re75,
                         data = "lalonde",
-                        privacy = "norm",
-                        sd = 0.3,
                         newobj = "matched_lalonde",
 
                         method = "nearest")

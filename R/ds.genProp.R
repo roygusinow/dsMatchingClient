@@ -41,9 +41,6 @@ ds.genProp <- function(formula,
   if(!inherits(coefficients, "numeric")){
     stop("Please use a numeric vector for coefficients", call.=FALSE)
   }
-  if(length(all.vars(formula)) != length(coefficients)){
-    stop("Please ensure the correct number of coefficients for the formula provided", call.=FALSE)
-  }
 
   # if the argument 'data' is set, check that the data frame is defined (i.e. exists) on the server site
   if((is.null(data))){
