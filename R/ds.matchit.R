@@ -129,7 +129,7 @@ ds.matchit <- function(formula = NULL,
                  pooled.match[, id_name],
                  pooled.match[, "distance"],
                  pooled.match[, "weights"],
-                 pooled.match[, "subclass"],
+                 as.numeric(pooled.match[, "subclass"]), # temp fix
                  id_name)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally2)
 
