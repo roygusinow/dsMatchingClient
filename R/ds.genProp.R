@@ -49,7 +49,6 @@ ds.genProp <- function(formula,
 
   # weight  removal
   formula_clean <- remove_weights(formula)
-
   coefficients <- encode_coef_names(coefficients)
 
   # first call

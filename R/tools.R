@@ -658,7 +658,7 @@ remove_weights <- function(formula) {
 
 #' @noRd
 encode_coef_names <- function(coef_vec) {
-  names(coef_vec) <- gsub(":", ".", names(coef_vec), fixed = TRUE)
+  names(coef_vec) <- gsub(":", "...", names(coef_vec), fixed = TRUE)
   coef_vec
 }
 
