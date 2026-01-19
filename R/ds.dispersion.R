@@ -57,8 +57,11 @@ ds.dispersion <- function(fit,
 
   ds.genProp(formula = formula, coefficients = coef_vec, data = data, newobj = "pred_col", link = fit$family$link, datasources = datasources)
 
+  # weight  removal
+  formula_clean <- remove_weights(formula)
+
   # dispersion call
-  cally <- call("dispersionDS", formula, data, "pred_col", fit$family$family)
+  cally <- call("dispersionDS", formula_clean, data, "pred_col", fit$family$family)
   dispersion_list <- DSI::datashield.aggregate(datasources, cally)
 
   # weights call

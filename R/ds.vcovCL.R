@@ -51,8 +51,8 @@ ds.vcovCL <- function(fit,
     stop("The 'data' argument must be a character string referring to a server-side data object.")
   }
 
-  if (!is.null(error_type) && !is.character(error_type)) {
-    stop("The 'error_type' must be a character string (e.g., 'HC0'), or NULL.")
+  if (!error_type %in% c("HC0", "HC1", "HC2", "HC3", "const")) {
+    stop("The 'error_type' must be one of 'HC0', 'HC1', 'HC2', 'HC3', or 'const'.")
   }
 
   if (!is.null(clusters) && !is.factor(clusters)) {

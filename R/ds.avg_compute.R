@@ -8,6 +8,7 @@
 #' @param data A character string. The name of the data frame stored on the server side.
 #' @param treatment A character string. The name of the treatment variable within `data`.
 #' @param estimand A character string specifying the estimand to compute. One of `"ATE"`, `"ATT"`, or `"ATC"`. Default is `"ATE"`.
+#' @param comparison A character string indicating the type of comparison. One of `"difference"` (default), `"lnriskratio"`, or `"lnoddsratio"`.
 #' @param error_type A character string indicating the HC-type estimator to correct bias (e.g., `"HC0"`, `"HC1"`, etc.).
 #' If `NULL`, standard errors are not returned.
 #' @param clusters A factor vector indicating cluster membership (e.g., subclass assignments). Typically obtained via `ds.matchit`.
@@ -31,6 +32,7 @@ ds.avg_compute <- function(fit,
                            data,
                            treatment,
                            estimand = "ATE",
+                           comparison = "difference",
                            error_type = NULL,
                            clusters = NULL,
                            eps = 1e-7,
@@ -64,8 +66,12 @@ ds.avg_compute <- function(fit,
     stop("The 'estimand' must be one of: 'ATE', 'ATT', or 'ATC'.")
   }
 
-  if (!is.null(error_type) && !is.character(error_type)) {
-    stop("The 'error_type' must be a character string (e.g., 'HC0'), or NULL.")
+  if (!comparison %in% c("difference", "lnriskratio", "lnoddsratio")) {
+    stop("The 'comparison' must be one of: 'difference', 'lnriskratio' or 'lnoddsratio'.")
+  }
+
+  if (!error_type %in% c("HC0", "HC1", "HC2", "HC3", "const")) {
+    stop("The 'error_type' must be one of 'HC0', 'HC1', 'HC2', 'HC3', or 'const'.")
   }
 
   if (!is.null(clusters) && !is.factor(clusters)) {
@@ -84,6 +90,7 @@ ds.avg_compute <- function(fit,
                                    data,
                                    treatment,
                                    estimand,
+                                   comparison,
                                    datasources)
   avg_list$estimate <- estimate
 
@@ -94,6 +101,7 @@ ds.avg_compute <- function(fit,
                      data,
                      treatment,
                      estimand,
+                     comparison,
                      eps,
                      datasources)
 

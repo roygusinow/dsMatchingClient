@@ -28,16 +28,17 @@ assign_ONES <- function(vec = NULL, datasources){
 avg_compute_estimate <- function(fit,
                                  data,
                                  treatment = NULL,
-                                 avg_type = "ATE",
+                                 estimand = "ATE",
+                                 comparison = "difference",
                                  datasources = NULL){
   # function to retrieve federated estimate
 
   dsBaseClient::ds.assign(toAssign = paste0(data, "$", treatment, " - ", data, "$", treatment),
             newobj = "ZEROS",
             datasources = datasources)
-  if (avg_type == "ATE"){
+  if (estimand == "ATE"){
     data <- data
-  }else if (avg_type == "ATT"){
+  }else if (estimand == "ATT"){
 
     dsBaseClient::ds.dataFrameSubset(df.name = data,
                        V1.name = paste0(data, "$", treatment),
@@ -49,7 +50,7 @@ avg_compute_estimate <- function(fit,
                        notify.of.progress = FALSE) # remove treatment
     data <- "new_data"
 
-  }else if (avg_type == "ATC"){
+  }else if (estimand == "ATC"){
 
     dsBaseClient::ds.dataFrameSubset(df.name = data,
                        V1.name = paste0(data, "$", treatment),
@@ -112,7 +113,14 @@ avg_compute_estimate <- function(fit,
   avg_off <- dsBaseClient::ds.mean("df_off_pred", type = "combined", datasources = datasources)$Global.Mean[, "EstimatedMean"]
   avg_on <- dsBaseClient::ds.mean("df_on_pred", type = "combined", datasources = datasources)$Global.Mean[, "EstimatedMean"]
 
-  avg_diff <- avg_on - avg_off
+  if (comparison == "difference") {
+    avg_diff <- avg_on - avg_off
+  } else if (comparison == "lnriskratio") {
+    avg_diff <- log(avg_on / avg_off)
+  } else if (comparison == "lnoddsratio") {
+    avg_diff <- log((avg_on / (1 - avg_on)) / (avg_off / (1 - avg_off)))
+  }
+  # avg_diff <- avg_on - avg_off
 
   return(avg_diff)
 }
@@ -633,6 +641,25 @@ ds.delete_col <- function(
     )
   }
 
+}
+
+#' @noRd
+remove_weights <- function(formula) {
+  # remove weights from formula object
+  fstr <- paste(deparse(formula), collapse = "")
+  fstr <- gsub("\\+?\\s*weights\\([^)]*\\)", "", fstr)
+  fstr <- gsub("\\s+", " ", fstr)
+  fstr <- trimws(fstr)
+  fstr <- sub('^"(.*)"$', '\\1', fstr) # remove leading/trailing quotes if present
+  formula_clean <- as.formula(fstr, env = parent.frame())
+  return(formula_clean)
+}
+
+
+#' @noRd
+encode_coef_names <- function(coef_vec) {
+  names(coef_vec) <- gsub(":", ".", names(coef_vec), fixed = TRUE)
+  coef_vec
 }
 
 # strip_weights_from_formula <- function(formula_obj) {

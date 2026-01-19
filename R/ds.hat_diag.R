@@ -48,10 +48,6 @@ ds.hat_diag <- function(fit,
     stop("Please provide a valid dataframe on the serverside")
   }
 
-  # Ensure fit$formula is a formula; convert if not
-  if (!inherits(fit$formula, "formula")) {
-    fit_formula <- stats::as.formula(fit$formula)
-  }
 
   # get global components
   # cov mat
@@ -67,8 +63,11 @@ ds.hat_diag <- function(fit,
   }
   names(global_avg_vec) <- cnames
 
+  fit_formula <- stats::as.formula(fit$formula)
+  formula_clean <- remove_weights(fit_formula)
+
   cally <- call("hat_diagDS",
-                form = fit_formula, data,
+                form = formula_clean, data,
                 global_cov_mat = c(global_cov_mat),
                 global_avg_vec,
                 global_n = fit$Ntotal)

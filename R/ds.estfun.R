@@ -57,10 +57,7 @@ ds.estfun <- function(fit,
     stop("Please provide an object name on the server side for the hat diagonals. Consider using ds.hat_diag")
   }
 
-  # Ensure fit$formula is a formula; convert if not
-  if (!inherits(fit$formula, "formula")) {
-    fit_formula <- stats::as.formula(fit$formula)
-  }
+  fit_formula <- stats::as.formula(fit$formula)
 
   # prediction vector
   coef_vec <- fit$coefficients[,1]
@@ -73,7 +70,9 @@ ds.estfun <- function(fit,
                         datasources = datasources)
 
   # estfun call
-  cally <- call("estfunDS", fit_formula, data, "pred_col", error_type, h_diag)
+  formula_clean <- remove_weights(fit_formula)
+
+  cally <- call("estfunDS", formula_clean, data, "pred_col", error_type, h_diag)
   rval_unscaled_list <- DSI::datashield.aggregate(datasources, cally)
 
   rval_scaled_list <- mapply(function(x, y) x / y,

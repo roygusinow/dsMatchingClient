@@ -27,6 +27,7 @@ ds.jacobian <- function(fit,
                         data,
                         treatment,
                         estimand = "ATE",
+                        comparison = "difference",
                         eps = 1e-7,
                         datasources = NULL
 
@@ -54,6 +55,10 @@ ds.jacobian <- function(fit,
     stop("The 'estimand' must be one of: 'ATE', 'ATT', or 'ATC'.")
   }
 
+  if (!comparison %in% c("difference", "lnriskratio", "lnoddsratio")) {
+    stop("The 'comparison' must be one of: 'difference' or 'ratio'.")
+  }
+
   if (!is.numeric(eps) || length(eps) != 1 || eps <= 0) {
     stop("The 'eps' argument must be a single positive numeric value.")
   }
@@ -63,6 +68,7 @@ ds.jacobian <- function(fit,
                                     data,
                                     treatment,
                                     estimand,
+                                    comparison,
                                     datasources)
 
   # construct J
@@ -79,6 +85,7 @@ ds.jacobian <- function(fit,
                                           data,
                                           treatment,
                                           estimand,
+                                          comparison,
                                           datasources)
 
     J <- c(J, (clean_avg - perturbed_avg) / eps)

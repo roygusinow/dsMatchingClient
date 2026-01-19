@@ -47,8 +47,13 @@ ds.genProp <- function(formula,
     stop("Please provide a valid dataframe on the serverside")
   }
 
+  # weight  removal
+  formula_clean <- remove_weights(formula)
+
+  coefficients <- encode_coef_names(coefficients)
+
   # first call
-  cally <- call("genPropDS", formula, coefficients, data, link)
+  cally <- call("genPropDS", formula_clean, coefficients, data, link)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
 
   return()
