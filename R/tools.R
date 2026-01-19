@@ -19,10 +19,10 @@ assign_ZEROS <- function(vec = NULL, datasources){
           newobj = "ZEROS", datasources = datasources)
 }
 #' @noRd
-assign_ONES <- function(vec = NULL, datasources){
+assign_ONES <- function(vec = NULL, datasources, newobj_name = "ONES"){
   # assign zeros of the correct vec length to a server
   dsBaseClient::ds.make(toAssign = paste0(vec, "-", vec, "+ 1"),
-          newobj = "ONES", datasources = datasources)
+          newobj = newobj_name, datasources = datasources)
 }
 #' @noRd
 avg_compute_estimate <- function(fit,
@@ -87,9 +87,10 @@ avg_compute_estimate <- function(fit,
   dsBaseClient::ds.assign(toAssign = data,
             newobj = "df_on",
             datasources = datasources)
-  dsBaseClient::ds.assign(toAssign = paste0(data, "$", treatment, " + !", data, "$", treatment),
-            newobj = treatment,
-            datasources = datasources)
+  # dsBaseClient::ds.assign(toAssign = paste0(data, "$", treatment, " + !", data, "$", treatment),
+  #           newobj = treatment,
+  #           datasources = datasources)
+  assign_ONES(treatment, datasources = datasources, newobj_name = treatment)
   dsBaseClient::ds.dataFrameSubset(df.name = "df_on",
                      V1.name = paste0(data, "$", treatment),
                      V2.name = paste0(data, "$", treatment),
