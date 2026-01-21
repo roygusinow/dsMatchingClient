@@ -74,10 +74,6 @@ ds.avg_compute <- function(fit,
     stop("The 'error_type' must be one of 'HC0', 'HC1', 'HC2', 'HC3', or 'const'.")
   }
 
-  if (!is.null(clusters) && !is.factor(clusters)) {
-    stop("The 'clusters' argument must be a integer vector if provided.")
-  }
-
   if (!is.numeric(eps) || length(eps) != 1 || eps <= 0) {
     stop("The 'eps' argument must be a single positive numeric value.")
   }

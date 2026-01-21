@@ -157,6 +157,27 @@ meatCL_ds <- function(score_eval,
   return(rval)
 }
 #' @noRd
+meatHC_ds <- function(M, error_type, n, k) {
+  # robust but not clustered
+  # n <- NROW(score_eval)
+  # k <- NCOL(score_eval)
+
+  # aggr_score_eval <- score_eval
+
+  # M <- (t(score_eval) %*% score_eval)
+  M <- M / n
+
+  if (error_type == "HC0") {
+    M
+  } else if (error_type == "HC1") {
+    (n - 1) / (n - k) * M
+  } else if (error_type %in% c("HC2", "HC3")) {
+    M
+  } else {
+    stop("Unknown error_type")
+  }
+}
+#' @noRd
 pool_servers <- function(list_servers){
   pool.mat <- matrix(, nrow = 0, ncol = 2)
   for (serv in list_servers){

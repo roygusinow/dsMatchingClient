@@ -29,6 +29,7 @@ ds.estfun <- function(fit,
                       data,
                       error_type = "HC0",
                       h_diag = "h_diag",
+                      using_clusters = FALSE,
                       datasources = NULL
 ){
   # look for DS connections
@@ -72,12 +73,19 @@ ds.estfun <- function(fit,
   # estfun call
   formula_clean <- remove_weights(fit_formula)
 
-  cally <- call("estfunDS", formula_clean, data, "pred_col", error_type, h_diag)
+  cally <- call("estfunDS", formula_clean, data, "pred_col", error_type, h_diag, using_clusters)
   rval_unscaled_list <- DSI::datashield.aggregate(datasources, cally)
 
-  rval_scaled_list <- mapply(function(x, y) x / y,
-                             rval_unscaled_list,
-                             rep(disp, length(rval_unscaled_list)))
+  if (using_clusters){
+    rval_scaled_list <- mapply(function(x, y) x / y,
+                               rval_unscaled_list,
+                               rep(disp, length(rval_unscaled_list)), SIMPLIFY = TRUE)
+  }else{
+    rval_scaled_list <- mapply(function(x, y) x / y,
+                               rval_unscaled_list,
+                               rep(disp**2, length(rval_unscaled_list)), SIMPLIFY = FALSE) # square because of mult?
+  }
+
 
   return(rval_scaled_list)
 }

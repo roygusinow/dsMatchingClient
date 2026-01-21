@@ -55,10 +55,6 @@ ds.vcovCL <- function(fit,
     stop("The 'error_type' must be one of 'HC0', 'HC1', 'HC2', 'HC3', or 'const'.")
   }
 
-  if (!is.null(clusters) && !is.factor(clusters)) {
-    stop("The 'clusters' argument must be a factor vector if provided.")
-  }
-
   # bread matrix
   dispersion <- ds.dispersion(fit,
                               data,
@@ -71,18 +67,56 @@ ds.vcovCL <- function(fit,
                         newobj_name = "h_diag",
                         datasources)
   # meat matrix
-  rval_unscaled_list <- ds.estfun(fit,
-                         data,
-                         error_type,
-                         h_diag = "h_diag",
-                         datasources)
+  if (!is.null(clusters)) {
+    # when conducting cl errors, need to pass clusters to estfun
+    # estfun returns rval unscaled list already aggregated by clusters
+    rval_unscaled_list <- ds.estfun(fit,
+                           data,
+                           error_type,
+                           h_diag = "h_diag",
+                           using_clusters = TRUE,
+                           datasources)
 
-  score_eval <- do.call("rbind", rval_unscaled_list)
-  M <- meatCL_ds(score_eval,
-                 clusters,
-                 error_type)
+    score_eval <- do.call("rbind", rval_unscaled_list)
 
-  sand <- B %*% M %*% B / NROW(score_eval)
+    M <- meatCL_ds(score_eval,
+                   clusters,
+                   error_type)
+  }else{
+
+    # when no cl errors, just get list of meats
+    n <- fit$Nvalid # total number of samples
+    k <- ncol(fit$VarCovMatrix) # number of parameters
+
+    M_list <- ds.estfun(fit,
+                           data,
+                           error_type,
+                           h_diag = "h_diag",
+                           using_clusters = FALSE,
+                           datasources)
+
+    M <- Reduce(`+`, M_list)
+
+    M <- meatHC_ds(M, error_type, n, k)
+  }
+  # rval_unscaled_list <- ds.estfun(fit,
+  #                        data,
+  #                        error_type,
+  #                        h_diag = "h_diag",
+  #                        datasources)
+  #
+  # score_eval <- do.call("rbind", rval_unscaled_list)
+
+  # if (!is.null(clusters)) {
+  #   M <- meatCL_ds(score_eval,
+  #                  clusters,
+  #                  error_type)
+  # }else{
+  #   M <- meatHC_ds(score_eval, error_type)
+  # }
+
+  # sand <- B %*% M %*% B / NROW(score_eval)
+  sand <- B %*% M %*% B / fit$Nvalid
 
   return(sand)
 }
