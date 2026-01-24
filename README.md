@@ -11,7 +11,7 @@ MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org
 
 <figure>
 <img
-src="https://github.com/roygusinow/dsMatchingClient/tree/master/vignettes/resources/images/matching_noise.png"
+src="https://raw.githubusercontent.com/roygusinow/dsMatchingClient/master/vignettes/resources/images/matching_noise.png"
 alt="Differentially Private Propensity Score Matching" />
 <figcaption aria-hidden="true">Differentially Private Propensity Score
 Matching</figcaption>
