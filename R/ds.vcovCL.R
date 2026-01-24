@@ -19,6 +19,49 @@
 #' This implementation supports cluster-robust corrections using the `meatCL_ds()` helper, and leverages
 #' server-side assignments for computing hat matrix diagonals (`ds.hat_diag`) and score functions.
 #'
+#' The cluster-robust variance--covariance matrix is computed using the sandwich
+#' estimator
+#' \deqn{
+#' \widehat{V} = \widehat{A}\,\widehat{B}\,\widehat{A}
+#' }
+#' where the ``bread'' estimator \eqn{\widehat{A}} is based on the empirical inverse
+#' Hessian of the objective function \eqn{\Psi(y, x, \beta)}. The ``meat'' estimator
+#' is given by
+#'
+#' \deqn{
+#' \widehat{B}
+#' =
+#' \frac{1}{N}
+#' \sum_{s=1}^{S}
+#' \sum_{h=1}^{H}
+#' \left(
+#' \sum_{i=1}^{n_{s,h}}
+#' \psi\!\left(
+#' y_{s,h,i},
+#' x_{s,h,i},
+#' \widehat{\beta}_{ATE}
+#' \right)
+#' \right)
+#' \left(
+#' \sum_{i=1}^{n_{s,h}}
+#' \psi\!\left(
+#' y_{s,h,i},
+#' x_{s,h,i},
+#' \widehat{\beta}_{ATE}
+#' \right)
+#' \right)^{T}
+#' }
+#'
+#' where \eqn{\psi} denotes the estimating function. For generalized linear models
+#' implemented within DataSHIELD, \eqn{\psi} is equivalent to the evaluated score
+#' function, i.e.\ the first derivative of the log-likelihood \eqn{\Psi}. In this
+#' setting, the quantities communicated to the central client are products of
+#' residuals and the design matrix, which are not recoverable at the individual
+#' level once transmitted.
+#'
+#' When the number of clusters \eqn{H} is small, clusters residing on the same
+#' server may be aggregated locally prior to communication with the central client.
+#'
 #' **Server-side functions called**:
 #' \itemize{
 #'   \item None, but uses `ds.dispersion`, `ds.hat_diag`, and `ds.estfun` to compute necessary components.

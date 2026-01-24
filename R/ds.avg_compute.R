@@ -25,6 +25,44 @@
 #' This function wraps internal client-side calls to compute treatment effects and, optionally, robust standard errors.
 #' It is part of the `dsMatchingClient` workflow and expects GLM models fitted using `ds.glm`.
 #'
+#' After the propensity score matching procedure has been conducted, there exist
+#' \eqn{H} subclassification strata (or matched groups) distributed across \eqn{S}
+#' remote servers. The average treatment effect (ATE) can be written as
+#'
+#' \deqn{
+#' \widehat{ATE}\left(X; \widehat{\beta}_{ATE}\right)
+#' =
+#' \sum_{s=1}^{S}
+#' \sum_{h=1}^{H}
+#' \sum_{i=1}^{n_{s,h,d}}
+#' w^{*}_{s,h,d,i}
+#' \left(
+#' \widehat{y}_{s,h,d=1,i}
+#' -
+#' \widehat{y}_{s,h,d=0,i}
+#' \right)
+#' }
+#'
+#' where \eqn{\widehat{y}_{ij} = Y_i \mid X_i, D_i = j} denotes the predicted outcome
+#' for the \eqn{i}-th sample conditional on covariates \eqn{X_i} and treatment status
+#' \eqn{j}. The corresponding weight is defined as
+#'
+#' \deqn{
+#' w^{*}_{s,h,d,i}
+#' =
+#' \frac{n_{s,d}}{N_d}
+#' \frac{n_{s,h,d}}{n_{s,d}}
+#' \frac{w_{s,h,d,i}}{n_{s,h,d}}
+#' }
+#'
+#' and depends on the number of samples within each stratum \eqn{h} and server
+#' \eqn{s}, as well as on the matching procedure used to generate
+#' \eqn{w_{s,h,d,i}}.
+#'
+#' The two innermost summations can be aggregated locally on each server prior to
+#' communication with the central client. Consequently, only a weighted ATE from
+#' each of the \eqn{S} remote servers is required to compute the global ATE estimate.
+#'
 #' @author Roy Gusinow
 #'
 #' @export

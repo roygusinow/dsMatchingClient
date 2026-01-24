@@ -1,7 +1,7 @@
 Package: dsMatchingClient
 Type: Package
 Title: Client-Side DataSHIELD Matching Method
-Version: 0.1.33
+Version: 1.0.0
 Authors@R:
   c(
     person("Roy", "Gusinow",

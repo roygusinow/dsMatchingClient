@@ -7,7 +7,14 @@ In the simplest case, this corresponds to the product of the design matrix and r
 the derivative of the log-likelihood with respect to parameters. It is primarily used for
 heteroskedasticity-consistent (HC) variance estimation.}
 \usage{
-ds.estfun(fit, data, error_type = "HC0", h_diag = "h_diag", datasources = NULL)
+ds.estfun(
+  fit,
+  data,
+  error_type = "HC0",
+  h_diag = "h_diag",
+  using_clusters = FALSE,
+  datasources = NULL
+)
 }
 \arguments{
 \item{fit}{A list. Output from `ds.glm`, containing at least `formula`, `coefficients`, and `family`.}

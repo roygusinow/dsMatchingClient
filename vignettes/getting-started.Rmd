@@ -22,10 +22,6 @@ This is an introduction to dsMatchingClient package for use within the DataSHIEL
 # Setup and Log in
 
 ```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-# Install the current version of both the client and server packages found locally
-devtools::install("../dsMatching")
-devtools::install("../dsMatchingClient")
-
 # Load all the required packages
 library(dsBase)
 library(dsBaseClient)
@@ -105,7 +101,6 @@ First, we will use the `nearest` method, which is a common method for matching b
 fed_match <- ds.matchit(form = treat ~ age + educ + married + nodegree + re74 + re75,
                         data = "lalonde",
                         newobj = "matched_lalonde",
-
                         method = "nearest")
 ```
 So now we have a new object `matched_lalonde` on the server, which contains the matched data based on the nearest neighbor propensity score matching with added noise.

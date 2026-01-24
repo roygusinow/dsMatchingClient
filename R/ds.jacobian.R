@@ -15,6 +15,25 @@
 #' In federated analyses, the Jacobian is approximated using finite differences by perturbing
 #' each coefficient in the GLM and recomputing the treatment effect.
 #'
+#' Let \eqn{J = \nabla_{\beta} ATE} denote the gradient of the average treatment
+#' effect with respect to the estimated parameters \eqn{\beta_{ATE}}. The
+#' \eqn{k}-th component of this gradient can be obtained numerically using a
+#' finite-difference approximation with step size \eqn{\varepsilon}:
+#'
+#' \deqn{
+#' J_k
+#' =
+#' \frac{
+#' ATE(X; \widehat{\beta}_k)
+#' -
+#' ATE(X; \widehat{\beta}_k + \varepsilon)
+#' }{\varepsilon}
+#' }
+#'
+#' Because the expression for the average treatment effect is computed in a
+#' federated and secure manner, the corresponding gradient expression is likewise
+#' non-disclosive.
+#'
 #' **Server-side functions called**:
 #' \itemize{
 #'   \item None
